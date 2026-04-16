@@ -7,6 +7,7 @@ import (
 	"fleetify-test/config"
 	"fleetify-test/models"
 	"fleetify-test/database"
+	"fleetify-test/src/handlers"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
@@ -29,6 +30,8 @@ func main() {
 	database.SeedItems(config.DB)
 
 	app := fiber.New()
+
+	app.Post("/api/login", handlers.Login)
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("API is running 🚀")
