@@ -6,9 +6,9 @@ type InvoiceItemRequest struct {
 }
 
 type CreateInvoiceRequest struct {
-	SenderName      string               `json:"sender_name"`
-	SenderAddress   string               `json:"sender_address"`
-	ReceiverName    string               `json:"receiver_name"`
-	ReceiverAddress string               `json:"receiver_address"`
-	Items           []InvoiceItemRequest `json:"items"`
+	SenderName      string                `json:"sender_name"`
+	SenderAddress   string                `json:"sender_address"`
+	ReceiverName    string                `json:"receiver_name"`
+	ReceiverAddress string                `json:"receiver_address"`
+	Items           []InvoiceItemRequest  `json:"items"`
 }

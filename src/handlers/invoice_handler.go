@@ -21,35 +21,34 @@ func CreateInvoice(c *fiber.Ctx) error {
 
 	userID := uint(c.Locals("user_id").(int))
 
-	var totalAmount int = 0
-
 	err := config.DB.Transaction(func(tx *gorm.DB) error {
 
-		invoiceNumber := fmt.Sprintf("INV-%d", time.Now().Unix())
-
 		invoice := models.Invoice{
-			InvoiceNumber:  invoiceNumber,
-			SenderName:     req.SenderName,
-			SenderAddress:  req.SenderAddress,
-			ReceiverName:   req.ReceiverName,
-			ReceiverAddress:req.ReceiverAddress,
-			TotalAmount:    0,
-			CreatedBy:      userID,
+			InvoiceNumber:   fmt.Sprintf("INV-%d", time.Now().Unix()),
+			SenderName:      req.SenderName,
+			SenderAddress:   req.SenderAddress,
+			ReceiverName:    req.ReceiverName,
+			ReceiverAddress: req.ReceiverAddress,
+			TotalAmount:     0,
+			CreatedBy:       userID,
 		}
 
 		if err := tx.Create(&invoice).Error; err != nil {
 			return err
 		}
 
+		var total int = 0
+
 		for _, itemReq := range req.Items {
 
 			var item models.Item
+
 			if err := tx.Where("code = ?", itemReq.Code).First(&item).Error; err != nil {
 				return fmt.Errorf("item not found: %s", itemReq.Code)
 			}
 
 			subtotal := item.Price * itemReq.Quantity
-			totalAmount += subtotal
+			total += subtotal
 
 			detail := models.InvoiceDetail{
 				InvoiceID: invoice.ID,
@@ -64,7 +63,9 @@ func CreateInvoice(c *fiber.Ctx) error {
 			}
 		}
 
-		if err := tx.Model(&invoice).Update("total_amount", totalAmount).Error; err != nil {
+		if err := tx.Model(&models.Invoice{}).
+			Where("id = ?", invoice.ID).
+			Update("total_amount", total).Error; err != nil {
 			return err
 		}
 
